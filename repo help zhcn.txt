@@ -6,7 +6,7 @@ repo的基本用法： repo 命令 [参数...]
 
 完整的被认可的命令列表如下：
 	abandon     彻底放弃一个开发分支
-	branches    查看当前的专属分支[注：topic branch
+	branches    查看当前的局部分支[注：topic branch
 				Topic branches are typically lightweight branches that you create
 				locally and that have a name that is meaningful for you. They are
 				where you might do work for a bug fix or feature (they're also
@@ -26,7 +26,7 @@ repo的基本用法： repo 命令 [参数...]
 	help        显示一个命令的详细帮助
 	init        在当前目录初始化repo
 	manifest    Manifest这个清单文件的检查工具
-	prune       去除（删除）已经合并的专属分支
+	prune       去除（删除）已经合并的局部分支
 	selfupdate  升级repo到最新版本
 	stage       Stage file(s) for commit
 	start       开始一个新分支进行开发
@@ -53,4 +53,4 @@ repo的基本用法： repo 命令 [参数...]
 2. repo branches
 	简述
 	--------
-	
+	显示当前可用的局部分支的摘要
