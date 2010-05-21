@@ -1,0 +1,56 @@
+		repo
+			——重铺，符合国家标准，顺应本市精神
+此帮助基于repo v1.6.8.10
+
+repo的基本用法： repo 命令 [参数...]
+
+完整的被认可的命令列表如下：
+	abandon     彻底放弃一个开发分支
+	branches    查看当前的专属分支[注：topic branch
+				Topic branches are typically lightweight branches that you create
+				locally and that have a name that is meaningful for you. They are
+				where you might do work for a bug fix or feature (they're also
+				called feature branches) that is expected to take some time to
+				complete.
+				Another type of branch is the "remote branch" or "remote-tracking
+				branch". This type of branch follows the development of somebody
+				else's work and is stored in your own repository. You periodically
+				update this branch (using git fetch) to track what is happening
+				elsewhere. When you are ready to catch up with everybody else's
+				changes, you would use git pull to both fetch and merge.]
+	checkout    检出一个分支进行开发
+	diff        显示提交和工作树之间的改变／差异
+	download    下载并检出一个变更
+	forall      在每个项目上都运行同一个shell命令
+	grep        列出能匹配一个模式的行
+	help        显示一个命令的详细帮助
+	init        在当前目录初始化repo
+	manifest    Manifest这个清单文件的检查工具
+	prune       去除（删除）已经合并的专属分支
+	selfupdate  升级repo到最新版本
+	stage       Stage file(s) for commit
+	start       开始一个新分支进行开发
+	status      显示工作树的状态
+	sync        更新工作树到最新版
+	upload      提交变更，准备进行复审
+	version     显示repo的版本号
+	
+	
+1. repo abandon
+	简述
+	————
+	彻底的放弃一个开发分支
+
+	用法：repo abandon <分支名字> [<项目>...]
+	
+	这个字命令可以彻底的放弃一个开发分支，从本地的仓库中删除它（包括它所有的历史）。
+	
+	这个命令相当于"git branch -D <分支名字>"
+
+	选项：
+		-h, --help	显示这个帮助信息然后退出
+		
+2. repo branches
+	简述
+	--------
+	
