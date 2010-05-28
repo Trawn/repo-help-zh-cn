@@ -141,3 +141,129 @@ repo的基本用法： repo 命令 [参数...]
 	选项-p,可以让'repo forall'把管道绑定到命令的stdin, stout和stderr流上, 并且输送所有的输出到一个连续的流中, 这个流会显示在一个pager的会话中. 项目的头信息会被插到每个命令的输出流的前面. 如果这个命令在一个项目上不产生输出, 则相应的头信息也不会显示.
 
 	选项-p产生的格式转换非常适合来做某些搜索工作. 比如, 'repo forall -p -c git log -SFoo', 这会打印出所有的关于Foo的添加删除等提交信息.
+
+	如果一个项目只有标准错误stderr输出的话, -v选项能让repo forall显示这些错误输出. 一般来讲, -p选项只会在命令至少有一个字节byte的输出时才会起作用.
+
+	环境
+	--------
+	pwd表示当前项目的工作目录. 如果当前的客户端是一个镜像的客户端, 那么pwd就是Git仓库.
+
+	REPO_PROJECT 设定成项目的唯一名字
+	REPO_PATH 客户端的相对路径
+	REPO_REMOTE 从manifest得到的远程系统的名字
+	REPO_LREV 是从manifest中得到的版次的名字, 和写在manifest中的是完全一样的
+
+	shell中按序排列的参数($1, $2, ..., $#)就是一五一十的<command>后的参数
+
+	除非-p选项被使用了, 否则stdin, stdout, stderr都是从terminal继承来的, 并不会被重定向.
+
+
+7. repo grep
+   简述
+   --------
+   打印出符合某个模式的行
+
+   用法: repo grep {pattern模式 | -e pattern} [<项目>...]
+
+   选项:
+		-h, --help				显示这个帮助信息后退出
+
+		Sources:
+			--cached			搜索索引, 而不是工作树
+			-r TREEish, --revision=TREEish
+								搜索TREEish, 而不是工作树
+								
+		模式:
+			-e PATTERN			用来搜索的模式
+			-i, --ignore-case	忽略大小写
+			-a, --text			把二进制文件像文本文件一样处理
+			-I					不要试着在二进制文件中去进行匹配
+			-w, --word-regexp	在word级别上进行匹配
+			-v, --invert-match	选择不匹配的行
+			-G, --basic-regexp	模式采用基本的POSIX正则表达式(默认)
+			-E, --extended-regexp
+								模式采用扩展的POSIX正则表达式
+			-F, --fixed-strings	模式采用固定的字符串(不是正则表达式)
+
+	模式分组:
+		--all-match				限制匹配的行包括所有的模式
+		--and, --or, --not		布尔操作, 用来组合各种模式
+		-(, -) 		 			布尔操作分组
+
+	输出:
+		-n						在匹配行前面加上行号
+		-C CONTEXT				围绕匹配行显示上下文
+		-B CONTEXT				显示匹配行前文
+		-A CONTEXT				显示匹配行后文
+		-l, --name-only, --files-with-matches
+								只显示包含匹配行的文件的名字
+		-L, --files-without-match
+								只显示不包含匹配行的文件的名字
+
+	描述
+	--------
+	在所有的项目文件中搜索指定的模式
+
+	布尔操作
+	--------
+	下面的这些选项, 在一个模式的中,可以尽可能多的出现, 从而使这个模式的表达更清楚
+	-e PATTERN
+	--and, --or, --not, -(, -)
+	进一步讲, 为了扫描多个树,选项-r/--revision可以被多次指定. 如果想再的文件匹配出现在多个树里, 只有第一个结果会被报告出来, 版次的名字会做为这个结果的前缀.
+
+	例子
+	--------
+	要找一行, 里面有#define, 并且有'MAX_PATH' 或者 'PATH_MAX':
+		repo grep -e '#define' --and -\( -e MAX_PATH -e PATH_MAX \)
+
+	查找一行, 里面有 'NODE'或'Unexpected', 并且在一个文件中这两个都有的.
+		repo grep --all-match -e NODE -e Unexpected
+
+
+8. repo help
+   简述
+   --------
+   显示命令的详细帮助
+
+   用法: repo help [--all|command]
+
+   选项:
+		-h, --help				显示这个帮助信息后退出
+		-a, --all				显示完整的命令列表
+
+	描述
+	--------
+	显示命令的详细用法信息
+
+
+9.  repo init
+    简述
+    --------
+	在当前目录初始化repo.
+
+	用法: repo init [选项]
+
+	选项:
+		-h, --help				显示这个帮助信息后退出
+
+		日志打印选项:
+			-q, --quiet			安静模式, 应该是啥都不打印出来吧
+
+		manifest选项:
+			-u URL, --manifest-url=URL
+								manifest仓库的位置
+			-b REVISION, --manifest-branch-REVISION
+								manifest的分支或版次
+			-m NAME.xml, --manifest-name=NAME.xml
+								初始化menifest文件
+			--mirror			mirror the forrest
+
+		repo的版本的选项:
+			--repo-url=URL		repo仓库的位置
+			--repo-branch=REVISION
+								repo的分支或版次
+			--no-repo-verify	不要验证repo的源码
+
+	描述
+	--------
+	repo init命令
