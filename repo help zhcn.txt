@@ -266,4 +266,81 @@ repo的基本用法： repo 命令 [参数...]
 
 	描述
 	--------
-	repo init命令
+	repo init命令只需运行一次来进行repo的安装和初始化. 最新版本的repo源码和manifest集合会被从服务器上下载并安装到当前工作树的.repo目录下.
+
+	-b选项, 可以用来选择manifest的分支, 从而可以对这个分支进行检出和使用. 如果没有指定分支, 那么master这个主分支是默认值.
+
+	-m选项, 可以用来指定一个备选的manifest来进行使用, 如果没有指定这个manifest, 那么默认的manifest是default.xml.
+
+	切换manifest分支
+	----------------
+	要切换到另一个manifest分支, 可以在已存在的客户端中使用'repo -init -b 其他分支'来完成. 需要说明的是, 这个命令只会更新manifest, 所以需要一个后继的命令repo sync(或者repo sync -d)来更新工作目录的文件.
+
+
+10. repo manifest
+	简述
+	--------
+	manifest检验工具
+
+	用法: repo manifest [-o {-|NAME.xml} [-r]]
+
+	选项:
+		-h, --help				显示这个帮助信息后退出
+		-r, --revision-as-HEAD	把某版次存为当前的HEAD
+		-o -|NAME.xml, --output-file=-|NAME.xml
+								把manifest存为NAME.xml
+
+	描述
+	--------
+	使用-o选项, 来检查当前的manifest文件. manifest文件和local_manifest.xml(如果存在)合并到一起, 产生一个新的单一的manifest文件. 这个文件会存储在git仓库里, 在将来使用repo init时可以用到它.
+
+	repo Manifest格式
+	=================
+	一个repo manifest里,描述了这个repo客户端的结构; 这就是我们看到的目录结构以及用git可以从哪里得到这些东西.
+	基本的manifest的结构是, 一个空的git仓库带着一个名叫'default.xml'的xml文件, 这个文件在最顶层目录中.
+	manifest文件是一定有它的版本控制的, 因为它们被保存在一个git仓库中. manifest文件们的升级, 是自动的在客户端运行repo sync而获得的.
+
+	XML文件格式
+	--------
+	一个manifest的XML文件(例如default.xml)大概的遵循下面的定义:
+	<!ELEMENT manifest (remote*,
+                        default?,
+                        remove-project*,
+                        project*)>
+  
+    <!ELEMENT remote (EMPTY)>
+    <!ATTLIST remote name         ID    #REQUIRED>
+    <!ATTLIST remote fetch        CDATA #REQUIRED>
+    <!ATTLIST remote review       CDATA #IMPLIED>
+  
+    <!ELEMENT default (EMPTY)>
+    <!ATTLIST default remote   IDREF #IMPLIED>
+    <!ATTLIST default revision CDATA #IMPLIED>
+  
+    <!ELEMENT project (EMPTY)>
+    <!ATTLIST project name     CDATA #REQUIRED>
+    <!ATTLIST project path     CDATA #IMPLIED>
+    <!ATTLIST project remote   IDREF #IMPLIED>
+    <!ATTLIST project revision CDATA #IMPLIED>
+  
+    <!ELEMENT remove-project (EMPTY)>
+    <!ATTLIST remove-project name  CDATA #REQUIRED>
+  ]>
+	下面是对这些元素和它们属性的描述.
+
+	Element manifest
+	----------------
+	这个文件的根元素.
+
+	Element remote
+	----------------
+	可以指定一个或多个远程元素. 每个远程元素, 都会列出一个git的url, 这个url被一个或多个项目共用. (可选的)同时也指出Gerrit审查服务器, 这些项目会把变更上传到这些服务器上.
+	属性name: manifest文件的一个唯一的短名字, 在这里列出的这个名字, 也就是每个项目的远程名, 记在.git/config里. 因此它自动的对下列命令是有效的: git fetch, git remote, git pull, git push, 等等.
+	属性fetch: 这是一个Git url, 会作为所有项目的前缀用来操作这个远程的库. 每个项目的名字都会加上这个前缀, 从而可以确定这个项目的真实地址, 以便进行clone等操作.
+	属性review: Gerrit服务器的主机名, 要审查的内容会通过repo upload上传到这里. 这个属性是可选的, 如果没有这一项, 那么repo upload没有任何作用.
+
+	Element default
+	----------------
+	至少有一个默认元素default element需要被指定. 当一个项目没有指定它自己的远程或版次属性的话, 这个默认的远程或版次属性就被应用到这个项目上面了.
+	属性remote: 先前定义的远程元素的名字. 如果项目中的元素没有它自己的这个远程属性的话, 则这个属性会应用在这个项目上.
+	属性revision: git分支的名字(例如, master或者refs/heads/master). 项目元素中没有它自己的这个属性的话会使用些值.
