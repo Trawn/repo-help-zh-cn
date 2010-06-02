@@ -406,3 +406,152 @@ repo的基本用法： repo 命令 [参数...]
 	----
 	如果有新版本的repo存在, 这个命令会升级repo到最新版本.
 	通常这个动作在repo sync时会自动去做, 所以不需要最终用户手动去执行.
+
+
+13. repo stage
+	简述
+	----
+	暂存文件, 以备提交
+
+	用法: repo stage -i[<project>...]
+
+	选项:
+		-h, --help				显示这个帮助信息后退出
+		-i, --interactive		交互式的暂存方式
+
+	描述
+	--------
+	这个命令把文件暂存起来以备下次提交
+
+
+14. repo start
+	简述
+	----
+	建立一个开发用的新分支.
+
+	用法: repo start <newbranchname> [--all | <project>...]
+
+	选项:
+		-h, --help				显示这个帮助信息后退出.
+		--all					把这个分支应用到所有的项目上.
+
+	描述
+	----
+	这个命令建立一个新的开发分支, 这个分支是人manifest中指定的版次拉出来的.
+
+15. repo status
+	简述
+	----
+	显示工作树的状态
+
+	用法: repo status [<project>...]
+
+	选项:
+		-h, --help				显示这个帮助信息后退出
+
+	描述
+	----
+	这个命令用来比较工作树和暂存区域(又叫索引index), 和大部分在这个分支上的最近提交(HEAD), 它会在每个指定的项目上进行这个动作. 每个文件一行, 来显示一个简要的信息, 说明这三个不同状态之间的区别.
+
+	状态显示
+	--------
+	状态显示会分成三列, 例如, 文件'subcmds/status.py'在repo这个项目的devwork分支上, 它被修改了:
+	project repo/                                   branch devwork
+	 -m     subcmds/status.py
+	第一列说明暂存区域(索引index)和上次提交(HEAD)之间的区别. 它的值会一直显示成大写字母, 意义如下:
+	-:  无差异
+	A:  新增加的      (不在HEAD中,      在索引中                     )
+ 	M:  修改过的      (  在HEAD中,      在索引中,  不同的内容         )
+ 	D:  删除了的      (  在HEAD中,    不在索引中,                     )
+ 	R:  改名了的      (不在HEAD中,      在索引中,   补丁变更          )
+ 	C:  复制了的      (不在HEAD中,      在索引中,   从别的地方复制过来)
+ 	T:  模式变化      (  在HEAD中,      在索引中,   相同的内容       )
+ 	U:  没有合并; 需要解决冲突方案
+
+	第二列说明工作目录和索引之间的差异. 它的值会用小写字母来表示, 意义如下:
+	-:  新的/未知的   (不在索引中,        在工作树中                )
+ 	m:  修改过的      (  在索引中,        在工作树中, 修改过        )
+ 	d:  删除的        (  在索引中,      不在工作树中                )
+
+
+16. repo sync
+	简述
+	----
+	更新工作树到最新的版次
+
+	用法: repo sync [<project> ...]
+
+	选项:
+		-h, --help				显示这个帮助信息后退出.
+		-l, --local-only		只更新工作树, 无抓取fetch动作
+		-n, --network-only		只抓取fetch, 不更新工作树
+		-d, --detach			把项目撤回到manifest中的版次
+		repo版本选项:
+			--no-repo-verify	不要验证repo的源码
+
+	描述:
+	----
+	这个命令, 把本地的项目目录和manifest中指定的远程库进行同步. 如果本地项目不存在, 则会克隆一个远程仓库的镜像到本地, 并按manifest中指定的建立一个跟踪分支. 如果本地项目已存在, 则更新远程分支到本地, 再把本地的新的改动在新的远程的基础上进行合并.
+
+	这命令会同步所有命令行中列出的项目. 可以用名字来指定项目, 也可以对项目的本地目录来说, 用相对或绝对的路径来指定它. 如果不指定任何项目, 则manifest中所有的项目都被同步.
+
+	-d/--detach选项用来把指定的项目回滚到manifest中的版次. 在当前项目是一个topic分支时这是很有帮助的, 但这要求manifest中有临时的版次.
+
+	SSH连接
+	--------
+	如果有至少一个项目的远程url使用了ssh连接(ssh://, git+ssh://, 或user@host:path 语法), repo会自动启用ssh连接管理来连接远程主机. 这个特性可以让同样的repo sync会话中的其他的项目重用ssh通道, 减少建立连接的开销.
+	在UNIX平台下, 要禁止这个功能, 需要把GIT_SSH环境亦是设为ssh, 如下:
+		export GIT_SSH=ssh
+		repo sync
+
+	兼容性
+	~~~~~~~~
+	这个特性会在windows平台下自动失效, 原因是没有UNIX下面的域套接字domain socket支持.
+	如果用户的~/.gitconfig里重写了url.insteadof, 这个特性也是不兼容的. repo sync当前不能在执行重写内容之前建立连接管理的通道.
+	如果远程SSH域是Gerrit代码审查系统, 那么要求使用2.0.10或更新的版本, 这样的版本中修复了一个服务器端的协议问题.
+
+
+17. repo upload
+	简述
+	----
+	把变更上传到代码审查系统中.
+
+	用法: repo upload [--re --cc] {[<project>]... | --replace <project>}
+
+	选项:
+		-h, --help				显示这个帮助信息后退出
+		--replace				从这个分支中上传替代补丁集
+		--re=REVIEWERS, --reviewers=REVIEWERS
+								要求指定的这些人来做审查
+		--cc=CC					同时发送mail到这些人
+
+	描述
+	--------
+	这个命令把变更发送到Gerrit审查系统中. 它从本地项目的topic分支中搜索还没有发布的内容准备去审查. 如果发现了多个topic分支, repo upload打开一个编辑器, 让用户选择要上传哪一个分支.
+	这个命令搜索在命令行中列出的所有的项目中的可以上传的变更. 项目可以用名字来指定, 或者用对于本地项目目录的相对或绝对路径来指定. 如果没有指定项目, 那么所有在manifest中的项目都会被搜索.
+	如果指定了--reviewers或者--cc, 这些用户的email会被分别加到列表中, 并发送email给他们. --reviewers指定的用户必须是代码审查系统中的注册用户, 否则上传会失败.
+	如果使用了--replace选项, 用户可以指派gerrit中哪个变更对于上传的分支中的提交更合适. 对于每一个匹配的变更对, 提交会做为一个新的补丁集, 完全取代gerrit中相关的文件和描述.
+	配置
+	----
+	review.URL.autoupload:
+	要使'Upload...(y/n)?'提示失效, 你可以设置一个针对每个项目的或全局的配置选项. 如果review.URL.autoupload设置成true, repo会认为你一直回答y, 在以后的上传过程中也不会再提示y/n.如果设成了false, 那么repo会假定你一直回答n, 并且会中止上传.
+	这个URL必须符合manifest中列出的审查URL, 或者项目中的.git/config. 例如:
+	[remote "origin"]
+    	url = git://git.example.com/project.git
+    	review = http://review.example.com/
+
+  	[review "http://review.example.com/"]
+    	autoupload = true
+
+	参考
+	----
+	Gerrit代码审查: http://code.google.com/p/gerrit/
+
+	
+18. repo version
+	简述
+	----
+	显示repo版本号
+	用法: repo version
+	选项:
+		-h, --help				显示这个帮助信息后退出.
